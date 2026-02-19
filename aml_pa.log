@@ -1,0 +1,85 @@
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+RuntimeError: The adapter was unable to infer a handler to use for the event. This is likely related to how the Lambda function was invoked. (Are you testing locally? Make sure the request payload is valid for a supported handler.)
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 71, in __call__
+    handler = self.infer(event, context)
+
+  File "/home/citrixlabph/.local/lib/python3.13/site-packages/mangum/adapter.py", line 56, in infer
+    raise RuntimeError(  # pragma: no cover
+    ...<4 lines>...
+    )
+Error running WSGI application
+ImportError: cannot import name 'WsgiMiddleware' from 'fastapi.middleware.wsgi' (/usr/local/lib/python3.13/site-packages/fastapi/middleware/wsgi.py). Did you mean: 'middleware'?
+  File "/var/www/citrixlabph_pythonanywhere_com_wsgi.py", line 20, in <module>
+    from fastapi.middleware.wsgi import WsgiMiddleware
+***************************************************
+If you're seeing an import error and don't know why,
+we have a dedicated help page to help you debug: 
+https://help.pythonanywhere.com/pages/DebuggingImportError/
+***************************************************
+Error running WSGI application
+ImportError: cannot import name 'WsgiMiddleware' from 'fastapi.middleware.wsgi' (/usr/local/lib/python3.13/site-packages/fastapi/middleware/wsgi.py). Did you mean: 'middleware'?
+  File "/var/www/citrixlabph_pythonanywhere_com_wsgi.py", line 21, in <module>
+    from fastapi.middleware.wsgi import WsgiMiddleware
+***************************************************
+If you're seeing an import error and don't know why,
+we have a dedicated help page to help you debug: 
+https://help.pythonanywhere.com/pages/DebuggingImportError/
+***************************************************
+Error running WSGI application
+ImportError: cannot import name 'WsgiMiddleware' from 'fastapi.middleware.wsgi' (/usr/local/lib/python3.13/site-packages/fastapi/middleware/wsgi.py). Did you mean: 'middleware'?
+  File "/var/www/citrixlabph_pythonanywhere_com_wsgi.py", line 21, in <module>
+    from fastapi.middleware.wsgi import WsgiMiddleware
+***************************************************
+If you're seeing an import error and don't know why,
+we have a dedicated help page to help you debug: 
+https://help.pythonanywhere.com/pages/DebuggingImportError/
+***************************************************
+Error running WSGI application
+TypeError: WSGIMiddleware.__call__() missing 1 required positional argument: 'send'
+Error running WSGI application
+TypeError: WSGIMiddleware.__call__() missing 1 required positional argument: 'send'

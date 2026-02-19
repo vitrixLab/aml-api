@@ -1,0 +1,6 @@
+fastapi
+a2wsgi
+uvicorn
+sqlalchemy
+pydantic
+structlog
