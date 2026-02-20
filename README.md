@@ -26,7 +26,7 @@ Base URL: `https://citrixlabph.pythonanywhere.com`
 Web Service + Cron Job: `https://aml-fraud-detection-api.onrender.com/doc`  
 Try it with curl:
 ```bash
-curl -X POST "https://citrixlabph.pythonanywhere.com/evaluate" \
+curl -X POST "https://aml-fraud-detection-api.onrender.com/evaluate" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: test-123" \
   -d '{"account_id":"1234Z","amount":100000,"country":"IRAN"}'
