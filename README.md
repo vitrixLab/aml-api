@@ -22,7 +22,8 @@ Each evaluation returns a **risk score**, a **decision** (APPROVE/REVIEW/BLOCK),
 - **Deployment**: PythonAnywhere
 
 ### Live Demo
-Base URL: `https://citrixlabph.pythonanywhere.com` | `https://aml-fraud-detection-api.onrender.com/doc`  
+Base URL: `https://citrixlabph.pythonanywhere.com` 
+Web Service + Cron Job: `https://aml-fraud-detection-api.onrender.com/doc`  
 Try it with curl:
 ```bash
 curl -X POST "https://citrixlabph.pythonanywhere.com/evaluate" \
