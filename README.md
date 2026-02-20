@@ -1,4 +1,5 @@
-# AML/Fraud Detection API
+# AML/Fraud Detection API 
+![Cron job status](https://api.cron-job.org/jobs/7289154/59216d3b5dc5f451/status-7.svg)
 
 A lightweight, high‑performance API for real‑time anti‑money laundering (AML) and fraud screening. Designed to showcase industry‑relevant skills in financial compliance, this service evaluates transaction payloads against a set of configurable rules:
 
