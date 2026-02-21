@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>AML · Fraud Dashboard</title>
+  <!-- Font Awesome 6 (free) for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* A11Y: high contrast, focus rings, scalable fonts */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f2f5f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+      line-height: 1.4;
+      color: #1e293b;
+    }
+
+    /* main app card – mimics mobile screen */
+    .app-container {
+      max-width: 400px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 0 20px 40px -10px rgba(0,20,50,0.15);
+      overflow: hidden;
+      padding: 1.5rem 1.2rem 1rem;
+    }
+
+    /* status bar (9:41 style) – optional but keeps fidelity */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1.2rem;
+      opacity: 0.8;
+    }
+
+    /* headings */
+    h2, h3 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* total balance & limit card row */
+    .balance-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .total-balance-label {
+      font-size: 0.9rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .total-balance-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #0f1825;
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
+    }
+
+    .limit-card-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .limit-card-label {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .limit-card-amount {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #b45309; /* warm accent for risk */
+    }
+
+    /* three action buttons */
+    .action-buttons {
+      display: flex;
+      gap: 0.8rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+
+    .btn-outline {
+      background: white;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 40px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1e293b;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-outline:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .btn-outline:focus-visible {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    /* payment history = evaluation history */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .history-item {
+      background: #f8fafc;
+      border-radius: 24px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .item-product {
+      font-size: 1.1rem;
+    }
+
+    .item-amount {
+      font-weight: 700;
+      color: #0f1825;
+    }
+
+    .item-merchant {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+
+    .item-merchant i {
+      color: #2563eb;
+      font-size: 0.8rem;
+    }
+
+    .item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 6px 0 4px;
+    }
+
+    .tag {
+      background: #e6f0ff;
+      color: #1e4fd9;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 30px;
+      letter-spacing: 0.3px;
+    }
+
+    .tag.risk-high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .tag.risk-medium {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .decision-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 30px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .decision-badge.review {
+      background: #fff3e0;
+      color: #b85e00;
+    }
+
+    .decision-badge.block {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* three stats cards (On Progress, Overdue, Total) */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin: 2rem 0 1.5rem;
+    }
+
+    .stat-card {
+      background: #f1f5f9;
+      flex: 1;
+      border-radius: 24px;
+      padding: 0.9rem 0.5rem;
+      text-align: center;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 4px;
+    }
+
+    /* two 'installment' cards – for recent flagged items */
+    .installment-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 1.8rem 0 1.5rem;
+    }
+
+    .installment-card {
+      background: #ffffff;
+      border: 1px solid #e9edf2;
+      border-radius: 28px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 16px -8px rgba(0,0,0,0.08);
+    }
+
+    .installment-info h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .installment-info .merchant {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin: 2px 0 4px;
+    }
+
+    .installment-info .amount {
+      font-weight: 700;
+      color: #0f1825;
+    }
+
+    .installment-right {
+      text-align: right;
+    }
+
+    .installment-count {
+      background: #dbeafe;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #1e4fd9;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .btn-pay {
+      background: #183c6e;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-pay:hover {
+      background: #0f2b4f;
+    }
+
+    .btn-pay:focus-visible {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    /* bottom navigation */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #e9edf2;
+      padding-top: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 500;
+      transition: color 0.2s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      padding: 0.5rem;
+    }
+
+    .nav-item i {
+      font-size: 1.3rem;
+    }
+
+    .nav-item.active {
+      color: #183c6e;
+      font-weight: 600;
+    }
+
+    .nav-item:focus-visible {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    /* evaluation form (hidden by default) */
+    .evaluate-panel {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 30px;
+      font-size: 1rem;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+      border-color: transparent;
+    }
+
+    .btn-primary {
+      background: #183c6e;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .result-box {
+      background: #f1f5f9;
+      border-radius: 24px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .design-credit {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 1.8rem;
+      letter-spacing: 0.2px;
+    }
+
+    .design-credit i {
+      color: #e11d48;
+    }
+
+    /* utilities */
+    .text-success { color: #2e7d32; }
+    .text-warning { color: #b85e00; }
+    .text-danger { color: #b71c1c; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- status bar (optional) -->
+    <div class="status-bar" aria-hidden="true">
+      <span>9:41</span>
+      <span><i class="fa-solid fa-signal"></i> <i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+    </div>
+
+    <!-- main dashboard view -->
+    <div id="dashboardView">
+      <h2>Analytics</h2>
+
+      <!-- total balance / limit card area -->
+      <div class="balance-section">
+        <div class="total-balance-label">Total Transactions</div>
+        <div class="total-balance-number" id="totalVolume">$0.00</div>
+        <div class="limit-card-row">
+          <span class="limit-card-label">High‑risk amount</span>
+          <span class="limit-card-amount" id="highRiskAmount">$0.00</span>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-outline" aria-label="View details"><i class="fa-regular fa-rectangle-list"></i> Details</button>
+          <button class="btn-outline" aria-label="Risk rules"><i class="fa-regular fa-shield"></i> Rules</button>
+          <button class="btn-outline" aria-label="More options"><i class="fa-regular fa-ellipsis"></i> More</button>
+        </div>
+      </div>
+
+      <!-- Evaluation History (was Payment History) -->
+      <h3><i class="fa-regular fa-clock"></i> Evaluation History</h3>
+      <div id="historyContainer" class="history-list">
+        <!-- dynamic from JS -->
+      </div>
+
+      <!-- three stats cards (On Progress, Overdue, Total -> Approved, Reviewed, Blocked) -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="approvedTotal">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reviewed</div>
+          <div class="stat-value" id="reviewedTotal">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Blocked</div>
+          <div class="stat-value" id="blockedTotal">$0</div>
+        </div>
+      </div>
+
+      <!-- two 'installment' cards – for most recent review/block items -->
+      <div class="installment-row" id="flaggedItemsContainer">
+        <!-- JS will populate two items needing attention -->
+      </div>
+    </div>
+
+    <!-- evaluate new transaction panel (hidden initially) -->
+    <div id="evaluateView" class="evaluate-panel">
+      <h3><i class="fa-regular fa-paper-plane"></i> New Evaluation</h3>
+      <form id="evaluateForm">
+        <div class="form-group">
+          <label for="accountId">Account ID</label>
+          <input type="text" id="accountId" placeholder="e.g. 1234Z" required aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="amount">Amount (USD)</label>
+          <input type="number" id="amount" step="0.01" min="0" placeholder="2500.00" required aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" required aria-required="true">
+            <option value="">Select country</option>
+            <option value="US">United States</option>
+            <option value="IRAN">IRAN</option>
+            <option value="NORTH_KOREA">NORTH KOREA</option>
+            <option value="SYRIA">SYRIA</option>
+            <option value="GB">United Kingdom</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fa-regular fa-flask"></i> Evaluate</button>
+      </form>
+      <div id="evaluationResult" class="result-box" style="display: none;"></div>
+    </div>
+
+    <!-- bottom navigation (Home / Pay Now = Evaluate) -->
+    <div class="bottom-nav" role="tablist">
+      <button class="nav-item active" id="navHome" aria-selected="true" role="tab"><i class="fa-regular fa-house"></i> Home</button>
+      <button class="nav-item" id="navEvaluate" aria-selected="false" role="tab"><i class="fa-regular fa-bolt"></i> Evaluate</button>
+    </div>
+
+    <!-- designer credit -->
+    <div class="design-credit">
+      <i class="fa-regular fa-heart"></i> @uitux.vikram UI/UX · AML edition
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- API CONFIGURATION ----------
+      const API_BASE = 'https://aml-fraud-detection-api.onrender.com';  // base URL from description
+      // We assume a GET /evaluations endpoint exists. If not, we fallback to mock + localStorage.
+      // For demo, we also store submitted evaluations in localStorage to persist across refresh.
+
+      // ---------- GLOBAL VARIABLES ----------
+      let evaluations = [];                // store all evaluations
+      let mockMode = false;                // becomes true if GET /evaluations fails
+
+      // ---------- DOM ELEMENTS ----------
+      const dashboard = document.getElementById('dashboardView');
+      const evaluatePanel = document.getElementById('evaluateView');
+      const navHome = document.getElementById('navHome');
+      const navEvaluate = document.getElementById('navEvaluate');
+      const historyContainer = document.getElementById('historyContainer');
+      const flaggedContainer = document.getElementById('flaggedItemsContainer');
+      const totalVolumeSpan = document.getElementById('totalVolume');
+      const highRiskSpan = document.getElementById('highRiskAmount');
+      const approvedSpan = document.getElementById('approvedTotal');
+      const reviewedSpan = document.getElementById('reviewedTotal');
+      const blockedSpan = document.getElementById('blockedTotal');
+      const evaluateForm = document.getElementById('evaluateForm');
+      const resultBox = document.getElementById('evaluationResult');
+
+      // ---------- UTILITY: format currency ----------
+      const formatUSD = (amount) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(amount);
+      };
+
+      // ---------- LOAD EVALUATIONS FROM API / MOCK ----------
+      async function loadEvaluations() {
+        try {
+          const res = await fetch(`${API_BASE}/evaluations`);  // assume endpoint exists
+          if (!res.ok) throw new Error('GET /evaluations not available');
+          const data = await res.json();
+          evaluations = data.map(tx => ({ ...tx, date: tx.date || new Date().toISOString() })); // ensure date
+        } catch (e) {
+          console.warn('Using mock evaluations (API endpoint missing)', e);
+          mockMode = true;
+          // create mock data similar to screenshot structure
+          evaluations = [
+            { id: 'tx1', account_id: '1234Z', amount: 628.71, country: 'US', decision: 'APPROVE', risk_score: 12, triggered_rules: [], date: '2026-01-01T10:00:00Z', description: 'Mac mini M4', merchant: 'Amazon.com' },
+            { id: 'tx2', account_id: '5678A', amount: 29.25, country: 'GB', decision: 'APPROVE', risk_score: 5, triggered_rules: [], date: '2026-01-02T14:30:00Z', description: 'Kreo Gaming Keyboard', merchant: 'Amazon.com' },
+            { id: 'tx3', account_id: '91011B', amount: 836.94, country: 'IRAN', decision: 'BLOCK', risk_score: 95, triggered_rules: ['country_risk', 'amount_threshold'], date: '2026-01-03T09:20:00Z', description: 'PS5', merchant: 'Flipkart.com' },
+            { id: 'tx4', account_id: '1213C', amount: 4500.00, country: 'SYRIA', decision: 'REVIEW', risk_score: 78, triggered_rules: ['country_risk'], date: '2026-01-04T18:15:00Z', description: 'Wire Transfer', merchant: 'Foreign Bank' },
+            { id: 'tx5', account_id: '1415D', amount: 12300.00, country: 'US', decision: 'REVIEW', risk_score: 82, triggered_rules: ['amount_threshold'], date: '2026-01-05T07:45:00Z', description: 'Consulting Payment', merchant: 'Acme Corp' },
+          ];
+        }
+        // after load, update UI
+        updateDashboard();
+      }
+
+      // ---------- UPDATE DASHBOARD WITH CURRENT EVALUATIONS ----------
+      function updateDashboard() {
+        // compute totals
+        let totalAmount = 0, highRiskAmount = 0;
+        let approvedTotal = 0, reviewedTotal = 0, blockedTotal = 0;
+
+        evaluations.forEach(tx => {
+          const amt = Number(tx.amount) || 0;
+          totalAmount += amt;
+          if (tx.decision === 'REVIEW' || tx.decision === 'BLOCK') {
+            highRiskAmount += amt;
+          }
+          if (tx.decision === 'APPROVE') approvedTotal += amt;
+          else if (tx.decision === 'REVIEW') reviewedTotal += amt;
+          else if (tx.decision === 'BLOCK') blockedTotal += amt;
+        });
+
+        totalVolumeSpan.textContent = formatUSD(totalAmount);
+        highRiskSpan.textContent = formatUSD(highRiskAmount);
+        approvedSpan.textContent = formatUSD(approvedTotal);
+        reviewedSpan.textContent = formatUSD(reviewedTotal);
+        blockedSpan.textContent = formatUSD(blockedTotal);
+
+        // render history list (last 3-4 items)
+        const sorted = [...evaluations].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const recent = sorted.slice(0, 4);
+
+        historyContainer.innerHTML = recent.map(tx => {
+          const date = new Date(tx.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+          const decisionClass = tx.decision === 'APPROVE' ? '' : (tx.decision === 'REVIEW' ? 'review' : 'block');
+          const tags = tx.triggered_rules?.map(rule => {
+            if (rule.includes('country')) return '<span class="tag risk-medium">high‑risk country</span>';
+            if (rule.includes('amount')) return '<span class="tag risk-high">large amount</span>';
+            return '<span class="tag">rule</span>';
+          }).join('') || '<span class="tag">no rules</span>';
+
+          return `
+            <div class="history-item">
+              <div class="item-header">
+                <span class="item-product">${tx.description || 'Transaction'}</span>
+                <span class="item-amount">-${formatUSD(tx.amount)}</span>
+              </div>
+              <div class="item-merchant">
+                <i class="fa-regular fa-building"></i> ${tx.merchant || 'Unknown'} · ${tx.country}
+              </div>
+              <div class="item-tags">
+                ${tags}
+              </div>
+              <div class="item-footer">
+                <span>${date}</span>
+                <span class="decision-badge ${decisionClass}">${tx.decision}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // two flagged items (for installment cards) – most recent REVIEW/BLOCK
+        const flagged = sorted.filter(tx => tx.decision === 'REVIEW' || tx.decision === 'BLOCK').slice(0, 2);
+        flaggedContainer.innerHTML = flagged.map(tx => {
+          const dueText = tx.decision === 'REVIEW' ? 'Needs review' : 'Blocked';
+          const countText = tx.decision === 'REVIEW' ? '1 Of 1 Review' : 'Blocked';
+          return `
+            <div class="installment-card">
+              <div class="installment-info">
+                <h4>${tx.description || 'Alert'}</h4>
+                <div class="merchant"><i class="fa-regular fa-store"></i> ${tx.merchant || 'Unknown'}</div>
+                <div class="amount">-${formatUSD(tx.amount)}</div>
+                <div style="font-size:0.8rem; color:#64748b;">Risk ${tx.risk_score}</div>
+              </div>
+              <div class="installment-right">
+                <span class="installment-count">${countText}</span>
+                <button class="btn-pay" aria-label="Review transaction"><i class="fa-regular fa-eye"></i> Review</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ---------- SUBMIT NEW EVALUATION (POST /evaluate) ----------
+      async function submitEvaluation(payload) {
+        const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : 'key-' + Date.now();
+        try {
+          const response = await fetch(`${API_BASE}/evaluate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const result = await response.json();
+
+          // show result
+          resultBox.style.display = 'block';
+          resultBox.innerHTML = `
+            <strong>Decision:</strong> <span class="${result.decision === 'APPROVE' ? 'text-success' : (result.decision === 'REVIEW' ? 'text-warning' : 'text-danger')}">${result.decision}</span><br>
+            <strong>Risk score:</strong> ${result.risk_score}<br>
+            <strong>Rules triggered:</strong> ${result.triggered_rules?.join(', ') || 'none'}<br>
+            <strong>Rationale:</strong> ${result.rationale || '—'}<br>
+            <hr style="margin:8px 0; border-color:#e2e8f0;">
+            <em>Stored with idempotency key.</em>
+          `;
+
+          // If in mock mode, push to local array; otherwise we could refetch from API.
+          if (mockMode) {
+            const newTx = {
+              id: 'local-' + Date.now(),
+              account_id: payload.account_id,
+              amount: payload.amount,
+              country: payload.country,
+              decision: result.decision,
+              risk_score: result.risk_score,
+              triggered_rules: result.triggered_rules || [],
+              date: new Date().toISOString(),
+              description: 'Manual evaluation',
+              merchant: 'API submission'
+            };
+            evaluations.unshift(newTx);
+            updateDashboard();
+          } else {
+            // real API: refetch evaluations to stay in sync
+            await loadEvaluations();
+          }
+        } catch (err) {
+          resultBox.style.display = 'block';
+          resultBox.innerHTML = `<span class="text-danger">Error: ${err.message}. Using demo mode.</span>`;
+          // fallback: mock result
+          const mockResult = {
+            decision: Math.random() > 0.6 ? 'BLOCK' : (Math.random() > 0.3 ? 'REVIEW' : 'APPROVE'),
+            risk_score: Math.floor(Math.random() * 100),
+            triggered_rules: payload.country === 'IRAN' || payload.country === 'NORTH_KOREA' || payload.country === 'SYRIA' ? ['country_risk'] : (payload.amount > 5000 ? ['amount_threshold'] : []),
+            rationale: 'Demo evaluation (API unreachable)'
+          };
+          resultBox.innerHTML += `<br><strong>Demo result:</strong> ${mockResult.decision} (score ${mockResult.risk_score})`;
+          // push to local
+          const newTx = {
+            id: 'demo-' + Date.now(),
+            account_id: payload.account_id,
+            amount: payload.amount,
+            country: payload.country,
+            decision: mockResult.decision,
+            risk_score: mockResult.risk_score,
+            triggered_rules: mockResult.triggered_rules,
+            date: new Date().toISOString(),
+            description: 'Manual',
+            merchant: 'Demo'
+          };
+          evaluations.unshift(newTx);
+          updateDashboard();
+        }
+      }
+
+      // ---------- EVENT LISTENERS ----------
+      navHome.addEventListener('click', () => {
+        dashboard.style.display = 'block';
+        evaluatePanel.style.display = 'none';
+        navHome.classList.add('active');
+        navEvaluate.classList.remove('active');
+        navHome.setAttribute('aria-selected', 'true');
+        navEvaluate.setAttribute('aria-selected', 'false');
+      });
+
+      navEvaluate.addEventListener('click', () => {
+        dashboard.style.display = 'none';
+        evaluatePanel.style.display = 'block';
+        navEvaluate.classList.add('active');
+        navHome.classList.remove('active');
+        navEvaluate.setAttribute('aria-selected', 'true');
+        navHome.setAttribute('aria-selected', 'false');
+        // hide previous result
+        resultBox.style.display = 'none';
+        evaluateForm.reset();
+      });
+
+      evaluateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const account_id = document.getElementById('accountId').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        const country = document.getElementById('country').value;
+
+        if (!account_id || isNaN(amount) || !country) return;
+
+        const payload = { account_id, amount, country };
+        await submitEvaluation(payload);
+      });
+
+      // initial load
+      loadEvaluations();
+
+      // A11Y: set proper roles for tabs already done, focus management is okay.
+    })();
+  </script>
+</body>
+</html>
