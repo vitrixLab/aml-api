@@ -2,22 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AML · Fraud Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    /* -------------------- VARIABLES -------------------- */
     :root {
-      --system-blue: #007AFF;
-      --system-red: #FF3B30;
-      --system-orange: #FF9500;
-      --system-green: #34C759;
-      --bg-gray: #F2F2F7;
-      --card-white: #FFFFFF;
-      --text-primary: #1C1C1E;
-      --text-secondary: #8E8E93;
-      --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --bg: #f2f5f9;
+      --card: #ffffff;
+      --text-primary: #1c1c1e;
+      --text-secondary: #6c6c70;
+      --accent-blue: #007aff;
+      --accent-red: #ff3b30;
+      --accent-orange: #ff9500;
+      --accent-green: #34c759;
+      --shadow-sm: 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+      --border-light: #e9ecf0;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1);
     }
 
+    /* -------------------- RESET & BASE -------------------- */
     * {
       margin: 0;
       padding: 0;
@@ -26,366 +34,754 @@
     }
 
     body {
-      background: var(--bg-gray);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
       color: var(--text-primary);
       display: flex;
       justify-content: center;
       min-height: 100vh;
-      overflow-x: hidden;
+      line-height: 1.4;
+      padding: 1rem 0.5rem;
     }
 
-    /* Smooth Page Transitions */
-    .fade-in {
-      animation: appleFade 0.6s ease-out forwards;
+    /* focus rings for accessibility */
+    *:focus-visible {
+      outline: 3px solid var(--accent-blue);
+      outline-offset: 2px;
     }
 
-    @keyframes appleFade {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    /* -------------------- MAIN CONTAINER -------------------- */
     .app-container {
       width: 100%;
-      max-width: 430px; /* iPhone 15 Pro Max width approx */
-      background: var(--bg-gray);
-      min-height: 100vh;
-      padding: 20px 16px 120px;
+      max-width: 400px;
+      background: transparent;
+      padding: 0 0 100px;
       position: relative;
     }
 
-    /* Typography */
-    h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 20px; }
-    h2 { font-size: 20px; font-weight: 600; margin: 24px 0 12px; }
+    /* fade-in animation */
+    .fade-in {
+      animation: fadeUp 0.5s ease-out forwards;
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
 
-    /* Glassmorphism/Apple Cards */
+    /* -------------------- TYPOGRAPHY -------------------- */
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 28px 0 16px;
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* -------------------- CARDS -------------------- */
     .card {
-      background: var(--card-white);
-      border-radius: 20px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
       padding: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      transition: var(--transition-spring);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
     }
-
     .card:active {
-      transform: scale(0.98);
-      background: #fafafa;
+      transform: scale(0.99);
+      box-shadow: var(--shadow-hover);
     }
 
-    /* Balance Section */
-    .balance-label { font-size: 13px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
-    .balance-val { font-size: 40px; font-weight: 800; margin: 4px 0; letter-spacing: -1px; }
-
-    /* Action Buttons - Pill style */
-    .action-row { display: flex; gap: 8px; margin-top: 16px; }
-    .btn-capsule {
-      flex: 1;
-      background: #E9E9EB;
-      border: none;
-      padding: 10px;
-      border-radius: 12px;
-      font-weight: 600;
+    /* -------------------- TOP BALANCE SECTION -------------------- */
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+    .balance-label {
       font-size: 14px;
-      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .total-balance {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 8px 0 12px;
+    }
+    .limit-card {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .limit-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .limit-amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-orange);
+    }
+
+    /* action buttons (Card Details, Freeze Card, More) */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 10px;
+    }
+    .action-btn {
+      flex: 1;
+      background: #f2f5f9;
+      border: none;
+      border-radius: 40px;
+      padding: 12px 0;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--accent-blue);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      color: var(--system-blue);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .action-btn:hover {
+      background: #e8ecf3;
     }
 
-    /* History List */
-    .tx-item {
+    /* -------------------- HISTORY ITEM -------------------- */
+    .history-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .item-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
-      border-bottom: 0.5px solid #E5E5EA;
     }
-    .tx-item:last-child { border-bottom: none; }
-    
-    .tx-info h4 { font-size: 16px; font-weight: 600; }
-    .tx-info p { font-size: 13px; color: var(--text-secondary); }
-
-    .tx-amount { text-align: right; }
-    .amt-val { font-weight: 700; font-size: 16px; }
-    
-    /* Status Badges */
-    .badge {
-      font-size: 11px;
+    .item-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .item-amount {
+      font-size: 18px;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
+    }
+    .item-merchant {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag {
+      background: #eef2f8;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .tag.risk-high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .tag.risk-med {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .decision-badge {
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 12px;
       text-transform: uppercase;
     }
-    .badge-approve { background: #E1F5E8; color: var(--system-green); }
-    .badge-review { background: #FFF4E5; color: var(--system-orange); }
-    .badge-block { background: #FFE5E5; color: var(--system-red); }
+    .decision-approve {
+      background: #e1f5e8;
+      color: #2e7d32;
+    }
+    .decision-review {
+      background: #fff4e5;
+      color: #b85e00;
+    }
+    .decision-block {
+      background: #ffe5e5;
+      color: #b71c1c;
+    }
 
-    /* Floating Tab Bar */
-    .tab-bar {
+    /* -------------------- STATS ROW (3 columns) -------------------- */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .stat-card {
+      flex: 1;
+      background: #f2f5f9;
+      border-radius: 24px;
+      padding: 14px 4px;
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* -------------------- INSTALLMENT CARDS (two items) -------------------- */
+    .installment-row {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 20px 0 30px;
+    }
+    .installment-card {
+      background: var(--card);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+    .installment-left h3 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .installment-left .merchant {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 4px 0;
+    }
+    .installment-left .amount {
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .installment-right {
+      text-align: right;
+    }
+    .installment-badge {
+      background: #dbeafe;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e4fd9;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .pay-btn {
+      background: var(--accent-blue);
+      border: none;
+      border-radius: 40px;
+      padding: 12px 22px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .pay-btn:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+
+    /* -------------------- BOTTOM NAVIGATION (Home / Pay Now) -------------------- */
+    .bottom-nav {
       position: fixed;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       width: 90%;
-      max-width: 380px;
-      background: rgba(255, 255, 255, 0.85);
+      max-width: 360px;
+      background: rgba(255,255,255,0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-radius: 30px;
+      border-radius: 40px;
       display: flex;
       padding: 8px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       z-index: 1000;
     }
-
-    .tab-item {
+    .nav-item {
       flex: 1;
+      background: transparent;
       border: none;
-      background: none;
-      padding: 12px;
-      border-radius: 22px;
+      border-radius: 30px;
+      padding: 12px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      color: var(--text-secondary);
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
+      color: var(--text-secondary);
       cursor: pointer;
-      transition: 0.3s;
+      transition: var(--transition);
     }
-
-    .tab-item.active {
-      background: var(--card-white);
-      color: var(--system-blue);
+    .nav-item i {
+      font-size: 20px;
+    }
+    .nav-item.active {
+      background: white;
+      color: var(--accent-blue);
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    /* Form Styling */
-    .form-group { margin-bottom: 20px; }
-    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; margin-left: 4px; }
+    /* -------------------- EVALUATION FORM -------------------- */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
     input, select {
       width: 100%;
-      background: #F2F2F7;
+      background: #f2f5f9;
       border: none;
-      padding: 16px;
-      border-radius: 14px;
-      font-size: 17px;
+      padding: 18px 16px;
+      border-radius: 16px;
+      font-size: 16px;
       outline: none;
     }
-    input:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); }
-
+    input:focus, select:focus {
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
+    }
     .btn-primary {
       width: 100%;
-      background: var(--system-blue);
+      background: var(--accent-blue);
       color: white;
       border: none;
       padding: 18px;
-      border-radius: 16px;
-      font-size: 17px;
+      border-radius: 30px;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
-      transition: var(--transition-spring);
+      transition: var(--transition);
     }
-    .btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+    .btn-primary:active {
+      transform: scale(0.96);
+    }
+    .result-card {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 20px;
+      background: #f2f5f9;
+      border-left: 6px solid var(--accent-blue);
+    }
 
-    /* Accessibility: Focus rings for keyboard users */
-    *:focus-visible {
-      outline: 2px solid var(--system-blue);
-      outline-offset: 4px;
+    /* designer credit */
+    .credit {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 32px 0 20px;
+    }
+    .credit i {
+      color: #ff3b30;
+    }
+
+    /* hide/show views */
+    #evaluateView {
+      display: none;
     }
   </style>
 </head>
 <body>
+  <div class="app-container">
+    <!-- main dashboard (home) -->
+    <div id="dashboardView" class="fade-in">
+      <h1>Analytics</h1>
 
-<div class="app-container">
-  
-  <main id="view-dashboard" class="fade-in">
-    <h1>Analytics</h1>
-    
-    <div class="card">
-      <p class="balance-label">Total Volume</p>
-      <div class="balance-val" id="totalVolume">$0.00</div>
-      <p style="color: var(--system-red); font-size: 14px; font-weight: 500;">
-        <i class="fa-solid fa-triangle-exclamation"></i> High Risk: <span id="highRiskAmount">$0.00</span>
-      </p>
-      
-      <div class="action-row">
-        <button class="btn-capsule"><i class="fa-solid fa-chart-line"></i> Report</button>
-        <button class="btn-capsule"><i class="fa-solid fa-shield-halved"></i> Rules</button>
+      <!-- total balance + limit card (combined card) -->
+      <div class="card">
+        <div class="balance-row">
+          <span class="balance-label">Total Volume</span>
+        </div>
+        <div class="total-balance" id="totalBalance">$0.00</div>
+
+        <div class="limit-card">
+          <span class="limit-label">Limit Card</span>
+          <span class="limit-amount" id="highRiskAmount">$0.00</span>
+        </div>
+
+        <!-- three action buttons -->
+        <div class="action-buttons">
+          <button class="action-btn"><i class="fa-regular fa-rectangle-list"></i> Details</button>
+          <button class="action-btn"><i class="fa-regular fa-snowflake"></i> Freeze</button>
+          <button class="action-btn"><i class="fa-regular fa-ellipsis"></i> More</button>
+        </div>
+      </div>
+
+      <!-- Payment History (renamed to Evaluation History) -->
+      <h2>Payment History</h2>
+      <div class="card" id="historyContainer">
+        <!-- dynamically populated -->
+      </div>
+
+      <!-- three stats row (On Progress / Overdue / Total -> Approved / Review / Blocked) -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="approvedTotal">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Review</div>
+          <div class="stat-value" id="reviewTotal">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Blocked</div>
+          <div class="stat-value" id="blockedTotal">$0</div>
+        </div>
+      </div>
+
+      <!-- two 'installment' cards (for recent flagged items) -->
+      <div class="installment-row" id="flaggedContainer">
+        <!-- populated from JS -->
+      </div>
+
+      <!-- designer credit (original) -->
+      <div class="credit">
+        <i class="fa-regular fa-heart"></i> @uitux.vikram UI/UX Designer
       </div>
     </div>
 
-    <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
-        <div class="card" style="min-width: 120px; margin-bottom:0; flex:1; text-align: center;">
-            <p class="balance-label">Pass</p>
-            <p id="approvedTotal" style="font-weight:700; font-size:18px;">$0</p>
-        </div>
-        <div class="card" style="min-width: 120px; margin-bottom:0; flex:1; text-align: center;">
-            <p class="balance-label">Review</p>
-            <p id="reviewedTotal" style="font-weight:700; font-size:18px; color: var(--system-orange);">$0</p>
-        </div>
-    </div>
-
-    <h2>Activity</h2>
-    <div class="card" id="historyContainer">
+    <!-- evaluate new transaction view -->
+    <div id="evaluateView" class="fade-in">
+      <h1>New Evaluation</h1>
+      <div class="card">
+        <form id="evaluateForm">
+          <div class="form-group">
+            <label for="accountId">Account ID</label>
+            <input type="text" id="accountId" placeholder="e.g. 1234Z" required>
+          </div>
+          <div class="form-group">
+            <label for="amount">Amount (USD)</label>
+            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label for="country">Country</label>
+            <select id="country" required>
+              <option value="">Select country</option>
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="IRAN">IRAN (sanctioned)</option>
+              <option value="NORTH_KOREA">NORTH KOREA</option>
+              <option value="SYRIA">SYRIA</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary">Evaluate</button>
+        </form>
+        <div id="evaluationResult" class="result-card" style="display: none;"></div>
       </div>
-  </main>
 
-  <main id="view-evaluate" class="fade-in" style="display:none;">
-    <h1>New Review</h1>
-    <div class="card">
-      <form id="evaluateForm">
-        <div class="form-group">
-          <label for="accountId">Account ID</label>
-          <input type="text" id="accountId" placeholder="e.g. 8829-X" required>
-        </div>
-        <div class="form-group">
-          <label for="amount">Transaction Amount (USD)</label>
-          <input type="number" id="amount" placeholder="0.00" step="0.01" required>
-        </div>
-        <div class="form-group">
-          <label for="country">Merchant Location</label>
-          <select id="country" required>
-            <option value="US">United States</option>
-            <option value="GB">United Kingdom</option>
-            <option value="IRAN">Iran (Sanctioned)</option>
-            <option value="SYRIA">Syria (Sanctioned)</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-primary">Evaluate Risk</button>
-      </form>
+      <!-- same credit for consistency -->
+      <div class="credit">
+        <i class="fa-regular fa-heart"></i> @uitux.vikram UI/UX Designer
+      </div>
     </div>
-    <div id="resultCard" class="card fade-in" style="display:none; border-left: 5px solid var(--system-blue);">
-        <h4 id="resultTitle">Analysis Complete</h4>
-        <p id="resultBody" style="margin-top:8px; font-size:14px; line-height:1.5;"></p>
+
+    <!-- bottom navigation (Home / Pay Now) -->
+    <div class="bottom-nav" role="tablist">
+      <button class="nav-item active" id="navHome" role="tab" aria-selected="true"><i class="fa-regular fa-house"></i> Home</button>
+      <button class="nav-item" id="navEvaluate" role="tab" aria-selected="false"><i class="fa-regular fa-bolt"></i> Pay Now</button>
     </div>
-  </main>
+  </div>
 
-  <nav class="tab-bar" role="tablist">
-    <button class="tab-item active" onclick="switchTab('dashboard')" id="tab-dashboard" role="tab" aria-selected="true">
-      <i class="fa-solid fa-house-chimney fa-lg"></i>
-      <span>Summary</span>
-    </button>
-    <button class="tab-item" onclick="switchTab('evaluate')" id="tab-evaluate" role="tab" aria-selected="false">
-      <i class="fa-solid fa-magnifying-glass-chart fa-lg"></i>
-      <span>Inspect</span>
-    </button>
-  </nav>
+  <script>
+    (function() {
+      // ---------- CONFIG ----------
+      const API_BASE = 'https://aml-fraud-detection-api.onrender.com';
 
-</div>
+      // ---------- LOCAL STATE (store evaluations as they come) ----------
+      let evaluations = [];
 
-<script>
-    // Configuration & Data
-    const API_BASE = 'https://aml-fraud-detection-api.onrender.com';
-    let evaluations = [
-        { id: '1', account_id: '1234Z', amount: 1250.00, country: 'US', decision: 'APPROVE', description: 'Apple Store', date: new Date().toISOString() },
-        { id: '2', account_id: '9921B', amount: 4500.00, country: 'IRAN', decision: 'BLOCK', description: 'Unrecognized Wire', date: new Date().toISOString() }
-    ];
+      // ---------- DOM ELEMENTS ----------
+      const dashboardView = document.getElementById('dashboardView');
+      const evaluateView = document.getElementById('evaluateView');
+      const navHome = document.getElementById('navHome');
+      const navEvaluate = document.getElementById('navEvaluate');
+      const totalBalanceSpan = document.getElementById('totalBalance');
+      const highRiskSpan = document.getElementById('highRiskAmount');
+      const approvedSpan = document.getElementById('approvedTotal');
+      const reviewSpan = document.getElementById('reviewTotal');
+      const blockedSpan = document.getElementById('blockedTotal');
+      const historyContainer = document.getElementById('historyContainer');
+      const flaggedContainer = document.getElementById('flaggedContainer');
+      const evaluateForm = document.getElementById('evaluateForm');
+      const resultDiv = document.getElementById('evaluationResult');
 
-    // UI Logic
-    function switchTab(tab) {
-        const dash = document.getElementById('view-dashboard');
-        const evalView = document.getElementById('view-evaluate');
-        const tabs = document.querySelectorAll('.tab-item');
-        
-        tabs.forEach(t => t.classList.remove('active'));
+      // ---------- UTILS ----------
+      const formatUSD = (val) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(val);
+      };
 
-        if(tab === 'dashboard') {
-            dash.style.display = 'block';
-            evalView.style.display = 'none';
-            document.getElementById('tab-dashboard').classList.add('active');
-            updateUI();
+      // ---------- LOAD INITIAL (maybe from localStorage) ----------
+      function loadStored() {
+        const stored = localStorage.getItem('aml_evaluations');
+        if (stored) {
+          try {
+            evaluations = JSON.parse(stored);
+          } catch (e) { evaluations = []; }
         } else {
-            dash.style.display = 'none';
-            evalView.style.display = 'block';
-            document.getElementById('tab-evaluate').classList.add('active');
+          // nothing stored, start empty
+          evaluations = [];
         }
-    }
+        updateDashboard();
+      }
 
-    function formatCurrency(val) {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
-    }
+      // persist to localStorage
+      function persistEvaluations() {
+        localStorage.setItem('aml_evaluations', JSON.stringify(evaluations));
+      }
 
-    function updateUI() {
-        const container = document.getElementById('historyContainer');
-        let total = 0, highRisk = 0, appvd = 0, revwd = 0;
+      // ---------- UPDATE UI WITH CURRENT EVALUATIONS ----------
+      function updateDashboard() {
+        // compute totals
+        let total = 0, highRisk = 0, approved = 0, review = 0, blocked = 0;
+        evaluations.forEach(tx => {
+          const amt = Number(tx.amount) || 0;
+          total += amt;
+          if (tx.decision !== 'APPROVE') highRisk += amt;
+          if (tx.decision === 'APPROVE') approved += amt;
+          else if (tx.decision === 'REVIEW') review += amt;
+          else if (tx.decision === 'BLOCK') blocked += amt;
+        });
 
-        container.innerHTML = evaluations.map(tx => {
-            total += tx.amount;
-            if(tx.decision !== 'APPROVE') highRisk += tx.amount;
-            if(tx.decision === 'APPROVE') appvd += tx.amount;
-            if(tx.decision === 'REVIEW') revwd += tx.amount;
+        totalBalanceSpan.textContent = formatUSD(total);
+        highRiskSpan.textContent = formatUSD(highRisk);
+        approvedSpan.textContent = formatUSD(approved);
+        reviewSpan.textContent = formatUSD(review);
+        blockedSpan.textContent = formatUSD(blocked);
 
-            const badgeClass = tx.decision.toLowerCase();
-            return `
-                <div class="tx-item">
-                    <div class="tx-info">
-                        <h4>${tx.description || 'Global Transfer'}</h4>
-                        <p>${tx.account_id} • ${tx.country}</p>
-                    </div>
-                    <div class="tx-amount">
-                        <div class="amt-val">-${formatCurrency(tx.amount)}</div>
-                        <span class="badge badge-${badgeClass}">${tx.decision}</span>
-                    </div>
-                </div>
-            `;
-        }).reverse().join('');
+        // history list (last 5, newest first)
+        const sorted = [...evaluations].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const recent = sorted.slice(0, 5);
+        historyContainer.innerHTML = recent.map(tx => {
+          const date = new Date(tx.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+          const decisionClass = 
+            tx.decision === 'APPROVE' ? 'decision-approve' : 
+            tx.decision === 'REVIEW' ? 'decision-review' : 'decision-block';
+          
+          // create tags from triggered_rules
+          const ruleTags = (tx.triggered_rules || []).map(rule => {
+            if (rule.includes('country')) return '<span class="tag risk-med">high‑risk country</span>';
+            if (rule.includes('amount')) return '<span class="tag risk-high">large amount</span>';
+            return `<span class="tag">${rule}</span>`;
+          }).join('');
+          // always show at least one tag if no rules
+          const tagsHtml = ruleTags || '<span class="tag">no rules</span>';
 
-        document.getElementById('totalVolume').textContent = formatCurrency(total);
-        document.getElementById('highRiskAmount').textContent = formatCurrency(highRisk);
-        document.getElementById('approvedTotal').textContent = formatCurrency(appvd);
-        document.getElementById('reviewedTotal').textContent = formatCurrency(revwd);
-    }
+          return `
+            <div class="history-item">
+              <div class="item-header">
+                <span class="item-title">${tx.description || 'Transaction'}</span>
+                <span class="item-amount">-${formatUSD(tx.amount)}</span>
+              </div>
+              <div class="item-merchant">
+                <i class="fa-regular fa-building"></i> ${tx.merchant || 'Unknown'} · ${tx.country}
+              </div>
+              <div class="item-tags">
+                ${tagsHtml}
+              </div>
+              <div class="item-footer">
+                <span>${date}</span>
+                <span class="decision-badge ${decisionClass}">${tx.decision}</span>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div style="padding:20px; text-align:center; color:var(--text-secondary)">No evaluations yet</div>';
 
-    // Form Handling
-    document.getElementById('evaluateForm').onsubmit = async (e) => {
+        // flagged items (installment cards) – most recent REVIEW/BLOCK
+        const flagged = sorted.filter(tx => tx.decision === 'REVIEW' || tx.decision === 'BLOCK').slice(0, 2);
+        flaggedContainer.innerHTML = flagged.map(tx => {
+          const countText = tx.decision === 'REVIEW' ? '1 Of 1 Review' : 'Blocked';
+          return `
+            <div class="installment-card">
+              <div class="installment-left">
+                <h3>${tx.description || 'Alert'}</h3>
+                <div class="merchant"><i class="fa-regular fa-store"></i> ${tx.merchant || 'Unknown'}</div>
+                <div class="amount">-${formatUSD(tx.amount)}</div>
+              </div>
+              <div class="installment-right">
+                <span class="installment-badge">${countText}</span>
+                <button class="pay-btn" aria-label="review"><i class="fa-regular fa-eye"></i> Review</button>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div style="padding:20px; text-align:center;">No flagged items</div>';
+      }
+
+      // ---------- CALL API /evaluate ----------
+      async function callEvaluate(payload) {
+        const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : 'key-' + Date.now();
+        try {
+          const response = await fetch(`${API_BASE}/evaluate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const result = await response.json();
+
+          // construct a transaction record
+          const newTx = {
+            id: Date.now().toString() + Math.random(),
+            account_id: payload.account_id,
+            amount: payload.amount,
+            country: payload.country,
+            decision: result.decision,
+            risk_score: result.risk_score,
+            triggered_rules: result.triggered_rules || [],
+            rationale: result.rationale || '',
+            date: new Date().toISOString(),
+            description: 'API evaluation',   // could be enhanced
+            merchant: 'API'
+          };
+          evaluations.unshift(newTx);
+          persistEvaluations();
+          updateDashboard();
+
+          // show result in evaluate panel
+          resultDiv.style.display = 'block';
+          resultDiv.innerHTML = `
+            <strong>Decision:</strong> 
+            <span style="color:${result.decision==='APPROVE'?'#2e7d32':(result.decision==='REVIEW'?'#b85e00':'#b71c1c')}">
+              ${result.decision}
+            </span><br>
+            <strong>Risk score:</strong> ${result.risk_score}<br>
+            <strong>Rules:</strong> ${result.triggered_rules?.join(', ') || 'none'}<br>
+            <strong>Rationale:</strong> ${result.rationale || '—'}<br>
+            <small>ID: ${idempotencyKey.slice(0,8)}…</small>
+          `;
+        } catch (err) {
+          resultDiv.style.display = 'block';
+          resultDiv.innerHTML = `<span style="color:#b71c1c;">Error: ${err.message}. Using demo mode.</span>`;
+          // fallback demo result
+          const mockDecision = payload.country === 'IRAN' || payload.country === 'NORTH_KOREA' || payload.country === 'SYRIA' ? 'BLOCK' : (payload.amount > 10000 ? 'REVIEW' : 'APPROVE');
+          const mockRules = [];
+          if (mockDecision === 'BLOCK') mockRules.push('country_risk');
+          if (payload.amount > 10000) mockRules.push('amount_threshold');
+          const mockTx = {
+            id: 'demo-' + Date.now(),
+            account_id: payload.account_id,
+            amount: payload.amount,
+            country: payload.country,
+            decision: mockDecision,
+            risk_score: mockDecision === 'BLOCK' ? 95 : (mockDecision === 'REVIEW' ? 65 : 20),
+            triggered_rules: mockRules,
+            rationale: mockDecision === 'BLOCK' ? 'High‑risk jurisdiction' : (mockDecision === 'REVIEW' ? 'Large amount' : 'No issues'),
+            date: new Date().toISOString(),
+            description: 'Manual',
+            merchant: 'Demo'
+          };
+          evaluations.unshift(mockTx);
+          persistEvaluations();
+          updateDashboard();
+        }
+      }
+
+      // ---------- EVENT LISTENERS ----------
+      navHome.addEventListener('click', () => {
+        dashboardView.style.display = 'block';
+        evaluateView.style.display = 'none';
+        navHome.classList.add('active');
+        navEvaluate.classList.remove('active');
+        navHome.setAttribute('aria-selected', 'true');
+        navEvaluate.setAttribute('aria-selected', 'false');
+      });
+
+      navEvaluate.addEventListener('click', () => {
+        dashboardView.style.display = 'none';
+        evaluateView.style.display = 'block';
+        navEvaluate.classList.add('active');
+        navHome.classList.remove('active');
+        navEvaluate.setAttribute('aria-selected', 'true');
+        navHome.setAttribute('aria-selected', 'false');
+        resultDiv.style.display = 'none';
+        evaluateForm.reset();
+      });
+
+      evaluateForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button');
-        btn.textContent = "Analyzing...";
-        
-        const payload = {
-            account_id: document.getElementById('accountId').value,
-            amount: parseFloat(document.getElementById('amount').value),
-            country: document.getElementById('country').value
-        };
+        const account_id = document.getElementById('accountId').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        const country = document.getElementById('country').value;
 
-        // Mocking API logic for speed & stability in demo
-        setTimeout(() => {
-            let decision = "APPROVE";
-            if(payload.amount > 10000) decision = "REVIEW";
-            if(["IRAN", "SYRIA", "NORTH_KOREA"].includes(payload.country)) decision = "BLOCK";
+        if (!account_id || isNaN(amount) || !country) return;
 
-            const newTx = {
-                ...payload,
-                id: Date.now().toString(),
-                decision: decision,
-                description: "Manual Review",
-                date: new Date().toISOString()
-            };
+        const payload = { account_id, amount, country };
+        await callEvaluate(payload);
+      });
 
-            evaluations.push(newTx);
-            btn.textContent = "Evaluate Risk";
-            
-            const resCard = document.getElementById('resultCard');
-            resCard.style.display = 'block';
-            resCard.style.borderLeftColor = decision === 'APPROVE' ? 'var(--system-green)' : 'var(--system-red)';
-            document.getElementById('resultBody').innerHTML = `
-                <strong>Decision: ${decision}</strong><br>
-                The transaction for ${formatCurrency(payload.amount)} was flagged based on ${payload.country} protocols.
-            `;
-            
-            // Haptic feedback simulation
-            if (window.navigator.vibrate) window.navigator.vibrate(10);
-        }, 800);
-    };
+      // initial load
+      loadStored();
 
-    // Initial Load
-    updateUI();
-</script>
-
+      // simulate first-time demo data if none (to match screenshot feel)
+      if (evaluations.length === 0) {
+        // add a few mock examples so the dashboard isn't empty (but still use real API after)
+        const demos = [
+          { account_id: '1234Z', amount: 628.71, country: 'US', decision: 'APPROVE', risk_score: 12, triggered_rules: [], date: new Date('2026-01-01').toISOString(), description: 'Mac mini M4', merchant: 'Amazon.com' },
+          { account_id: '5678A', amount: 29.25, country: 'GB', decision: 'APPROVE', risk_score: 5, triggered_rules: [], date: new Date('2026-01-02').toISOString(), description: 'Kreo Gaming Keyboard', merchant: 'Amazon.com' },
+          { account_id: '91011B', amount: 836.94, country: 'IRAN', decision: 'BLOCK', risk_score: 95, triggered_rules: ['country_risk', 'amount_threshold'], date: new Date('2026-01-03').toISOString(), description: 'PS5', merchant: 'Flipkart.com' }
+        ];
+        evaluations = demos;
+        persistEvaluations();
+        updateDashboard();
+      } else {
+        updateDashboard();
+      }
+    })();
+  </script>
 </body>
 </html>
